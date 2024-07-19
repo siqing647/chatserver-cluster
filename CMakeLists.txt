@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10) # 指定cmake的最低版本
 project(chat)   # 指定项目名称
 
-# 配置编译选项
+# 配置编译
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
 
 # 设置 C++ 标准
