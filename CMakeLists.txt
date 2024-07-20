@@ -1,8 +1,7 @@
-
 cmake_minimum_required(VERSION 3.10) # 指定cmake的最低版本
 project(chat)   # 指定项目名称
 
-# 配置编译
+# 配置编译选项
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
 
 # 设置 C++ 标准
@@ -18,7 +17,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include/server)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/MySQLConnectionPool)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/dbORM)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/model)
-include_directories(${PROJECT_SOURCE_DIR}/include/server/redis)
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty)
 # link_directories(/usr/lib64/mysql)
 
