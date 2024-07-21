@@ -1,4 +1,3 @@
-
 #pragma once
 
 #define LOG(str) \

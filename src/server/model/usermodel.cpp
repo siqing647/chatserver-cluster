@@ -1,73 +1,72 @@
-
 #include "usermodel.hpp"
 #include <iostream>
 using namespace std;
 
-// User±íµÄÔö¼Ó·½·¨
-bool UserModel::insert(User& user) {
-    // 1.×é×°sqlÓï¾ä
-    char sql[1024] = { 0 };
-    sprintf(
-        sql, "insert into user(name, password, state) values('%s', '%s', '%s')",
-        user.getName().c_str(), user.getPwd().c_str(), user.getState().c_str());
+// Userè¡¨çš„å¢åŠ æ–¹æ³•
+bool UserModel::insert(User &user) {
+  // 1.ç»„è£…sqlè¯­å¥
+  char sql[1024] = {0};
+  sprintf(
+      sql, "insert into user(name, password, state) values('%s', '%s', '%s')",
+      user.getName().c_str(), user.getPwd().c_str(), user.getState().c_str());
 
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp) {
-        if (sp->update(sql)) {
-            // »ñÈ¡²åÈë³É¹¦µÄÓÃ»§Êı¾İÉú³ÉµÄÖ÷¼üid
-            user.setId(mysql_insert_id((*sp).getConnection()));
-            return true;
-        }
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp) {
+    if (sp->update(sql)) {
+      // è·å–æ’å…¥æˆåŠŸçš„ç”¨æˆ·æ•°æ®ç”Ÿæˆçš„ä¸»é”®id
+      user.setId(mysql_insert_id((*sp).getConnection()));
+      return true;
     }
+  }
 
-    return false;
+  return false;
 }
 
-// ¸ù¾İÓÃ»§ºÅÂë²éÑ¯ÓÃ»§ĞÅÏ¢
+// æ ¹æ®ç”¨æˆ·å·ç æŸ¥è¯¢ç”¨æˆ·ä¿¡æ¯
 User UserModel::query(int id) {
-    // 1.×é×°sqlÓï¾ä
-    char sql[1024] = { 0 };
-    sprintf(sql, "select * from user where id = %d", id);
+  // 1.ç»„è£…sqlè¯­å¥
+  char sql[1024] = {0};
+  sprintf(sql, "select * from user where id = %d", id);
 
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp) {
-        MYSQL_RES* res = sp->query(sql);
-        if (res != nullptr) {
-            MYSQL_ROW row = mysql_fetch_row(res);
-            if (row != nullptr) {
-                User user;
-                user.setId(atoi(row[0]));
-                user.setName(row[1]);
-                user.setPwd(row[2]);
-                user.setState(row[3]);
-                mysql_free_result(res);
-                return user;
-            }
-        }
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp) {
+    MYSQL_RES *res = sp->query(sql);
+    if (res != nullptr) {
+      MYSQL_ROW row = mysql_fetch_row(res);
+      if (row != nullptr) {
+        User user;
+        user.setId(atoi(row[0]));
+        user.setName(row[1]);
+        user.setPwd(row[2]);
+        user.setState(row[3]);
+        mysql_free_result(res);
+        return user;
+      }
     }
+  }
 
-    return User();
+  return User();
 }
 
-// ¸üĞÂÓÃ»§µÄ×´Ì¬ĞÅÏ¢
+// æ›´æ–°ç”¨æˆ·çš„çŠ¶æ€ä¿¡æ¯
 bool UserModel::updateState(User user) {
-    // 1.×é×°sqlÓï¾ä
-    char sql[1024] = { 0 };
-    sprintf(sql, "update user set state = '%s' where id = %d",
-        user.getState().c_str(), user.getId());
+  // 1.ç»„è£…sqlè¯­å¥
+  char sql[1024] = {0};
+  sprintf(sql, "update user set state = '%s' where id = %d",
+          user.getState().c_str(), user.getId());
 
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp && sp->update(sql))
-        return true;
-    return false;
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp && sp->update(sql))
+    return true;
+  return false;
 }
 
-// ÖØÖÃÓÃ»§µÄ×´Ì¬ĞÅÏ¢
+// é‡ç½®ç”¨æˆ·çš„çŠ¶æ€ä¿¡æ¯
 void UserModel::resetState() {
-    // 1.×é×°sqlÓï¾ä
-    char sql[1024] = "update user set state = 'offline' where state = 'online'";
+  // 1.ç»„è£…sqlè¯­å¥
+  char sql[1024] = "update user set state = 'offline' where state = 'online'";
 
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp)
-        sp->update(sql);
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp)
+    sp->update(sql);
 }

@@ -1,17 +1,17 @@
-cmake_minimum_required(VERSION 3.10) # Ö¸¶¨cmakeµÄ×îµÍ°æ±¾
-project(chat)   # Ö¸¶¨ÏîÄ¿Ãû³Æ
+cmake_minimum_required(VERSION 3.10) # æŒ‡å®šcmakeçš„æœ€ä½ç‰ˆæœ¬
+project(chat)   # æŒ‡å®šé¡¹ç›®åç§°
 
-# ÅäÖÃ±àÒëÑ¡Ïî
+# é…ç½®ç¼–è¯‘é€‰é¡¹
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
 
-# ÉèÖÃ C++ ±ê×¼
+# è®¾ç½® C++ æ ‡å‡†
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# ÅäÖÃ×îÖÕµÄ¿ÉÖ´ĞĞÎÄ¼şÊä³öµÄÂ·¾¶
+# é…ç½®æœ€ç»ˆçš„å¯æ‰§è¡Œæ–‡ä»¶è¾“å‡ºçš„è·¯å¾„
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-# °üº¬Í·ÎÄ¼şÄ¿Â¼
+# åŒ…å«å¤´æ–‡ä»¶ç›®å½•
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/server)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/MySQLConnectionPool)
@@ -20,8 +20,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include/server/model)
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty)
 # link_directories(/usr/lib64/mysql)
 
-# ÉèÖÃ¶¯Ì¬Á´½Ó¿âÎÄ¼şÄ¿Â¼
+# è®¾ç½®åŠ¨æ€é“¾æ¥åº“æ–‡ä»¶ç›®å½•
 link_directories(${PROJECT_SOURCE_DIR}/lib)
 
-# ¼ÓÔØ×ÓÄ¿Â¼
+# åŠ è½½å­ç›®å½•
 add_subdirectory(src)

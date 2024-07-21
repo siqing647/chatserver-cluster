@@ -1,13 +1,12 @@
-
-# ╤╗рЕакр╩╦ЖSRC_LIST╠Да©ё╛╟Э╨╛ак╦цд©б╪обкЫсп╣дт╢нд╪Ч
+# Е╝ Д╧┴Д╨├Д╦─Д╦╙SRC_LISTЕ▐≤И┤▐О╪▄Е▄┘Е░╚Д╨├Х╞╔Г⌡╝Е╫∙Д╦▀Ф┴─Ф°┴Г └Ф╨░Ф√┤Д╩╤
 aux_source_directory(. SRC_LIST)
 aux_source_directory(./model MODEL_LIST)
 
-# ╤╗рЕ MySQL еДжцнд╪Чб╥╬╤
+# Е╝ Д╧┴ MySQL И┘█Г╫╝Ф√┤Д╩╤Х╥╞Е╬└
 add_definitions(-DMYSQL_CONFIG_FILE_PATH=\"${PROJECT_SOURCE_DIR}/config/mysql.conf\")
 
-# ж╦╤╗иЗЁи©иж╢ппнд╪Ч
+# Ф▄┤Е╝ Г■÷Ф┬░Е▐╞Ф┴╖Х║▄Ф√┤Д╩╤
 add_executable(ChatServer ${SRC_LIST} ${MODEL_LIST})
 
-# ж╦╤╗©иж╢ппнд╪Ча╢╫сй╠пХр╙рюю╣╣д©Бнд╪Ч
+# Ф▄┤Е╝ Е▐╞Ф┴╖Х║▄Ф√┤Д╩╤И⌠╬Ф▌╔Ф≈╤И°─Х╕│Д╬²Х╣√Г └Е╨⌠Ф√┤Д╩╤
 target_link_libraries(ChatServer muduo_net muduo_base mysqlclient mysql_connection_pool pthread)

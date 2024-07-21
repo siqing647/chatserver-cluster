@@ -1,4 +1,3 @@
-
 #ifndef CHATSERVER_H
 #define CHATSERVER_H
 
@@ -7,25 +6,25 @@
 using namespace muduo;
 using namespace muduo::net;
 
-// ÁÄÌì·şÎñÆ÷µÄÖ÷Àà
+// èŠå¤©æœåŠ¡å™¨çš„ä¸»ç±»
 class ChatServer {
 public:
-    // ³õÊ¼»¯ÁÄÌì·şÎñÆ÷¶ÔÏó
-    ChatServer(EventLoop* loop, const InetAddress& listenAddr,
-        const string& nameArg);
+  // åˆå§‹åŒ–èŠå¤©æœåŠ¡å™¨å¯¹è±¡
+  ChatServer(EventLoop *loop, const InetAddress &listenAddr,
+             const string &nameArg);
 
-    // Æô¶¯·şÎñ
-    void start();
+  // å¯åŠ¨æœåŠ¡
+  void start();
 
 private:
-    // ÉÏ±¨Á¬½ÓÏà¹ØĞÅÏ¢µÄ»Øµ÷º¯Êı
-    void onConnection(const TcpConnectionPtr&);
+  // ä¸ŠæŠ¥è¿æ¥ç›¸å…³ä¿¡æ¯çš„å›è°ƒå‡½æ•°
+  void onConnection(const TcpConnectionPtr &);
 
-    // ÉÏ±¨¶ÁĞ´ÊÂ¼şÏà¹ØĞÅÏ¢µÄ»Øµ÷º¯Êı
-    void onMessage(const TcpConnectionPtr&, Buffer*, Timestamp);
+  // ä¸ŠæŠ¥è¯»å†™äº‹ä»¶ç›¸å…³ä¿¡æ¯çš„å›è°ƒå‡½æ•°
+  void onMessage(const TcpConnectionPtr &, Buffer *, Timestamp);
 
-    TcpServer _server; // ×éºÏµÄ muduo ¿â£¬ÊµÏÖ·şÎñÆ÷¹¦ÄÜµÄÀà¶ÔÏó
-    EventLoop* _loop;  // Ö¸ÏòÊÂ¼şÑ­»·¶ÔÏóµÄÖ¸Õë
+  TcpServer _server; // ç»„åˆçš„ muduo åº“ï¼Œå®ç°æœåŠ¡å™¨åŠŸèƒ½çš„ç±»å¯¹è±¡
+  EventLoop *_loop;  // æŒ‡å‘äº‹ä»¶å¾ªç¯å¯¹è±¡çš„æŒ‡é’ˆ
 };
 
 #endif

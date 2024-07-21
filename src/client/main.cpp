@@ -1,4 +1,3 @@
-
 #include "json.hpp"
 #include <chrono>
 #include <ctime>
@@ -23,300 +22,298 @@ using json = nlohmann::json;
 #include "public.hpp"
 #include "user.hpp"
 
-// ¼ÇÂ¼µ±Ç°ÏµÍ³µÇÂ¼µÄÓÃ»§ĞÅÏ¢
+// è®°å½•å½“å‰ç³»ç»Ÿç™»å½•çš„ç”¨æˆ·ä¿¡æ¯
 User g_currentUser;
-// ¼ÇÂ¼µ±Ç°µÇÂ¼ÓÃ»§µÄºÃÓÑÁĞ±íĞÅÏ¢
+// è®°å½•å½“å‰ç™»å½•ç”¨æˆ·çš„å¥½å‹åˆ—è¡¨ä¿¡æ¯
 vector<User> g_currentUserFriendList;
-// ¼ÇÂ¼µ±Ç°µÇÂ¼ÓÃ»§µÄÈº×éÁĞ±íĞÅÏ¢
+// è®°å½•å½“å‰ç™»å½•ç”¨æˆ·çš„ç¾¤ç»„åˆ—è¡¨ä¿¡æ¯
 vector<Group> g_currentUserGroupList;
 
-// ¿ØÖÆÖ÷²Ëµ¥Ò³Ãæ³ÌĞò
+// æ§åˆ¶ä¸»èœå•é¡µé¢ç¨‹åº
 bool isMainMenuRunning = false;
 
-// ÓÃÓÚ¶ÁĞ´Ïß³ÌÖ®¼äµÄÍ¨ĞÅ
+// ç”¨äºè¯»å†™çº¿ç¨‹ä¹‹é—´çš„é€šä¿¡
 sem_t rwsem;
-// ¼ÇÂ¼µÇÂ¼×´Ì¬
-atomic_bool g_isLoginSuccess{ false };
+// è®°å½•ç™»å½•çŠ¶æ€
+atomic_bool g_isLoginSuccess{false};
 
-// ½ÓÊÕÏß³Ì
+// æ¥æ”¶çº¿ç¨‹
 void readTaskHandler(int clientfd);
-// »ñÈ¡ÏµÍ³Ê±¼ä£¨ÁÄÌìĞÅÏ¢ĞèÒªÌí¼ÓÊ±¼äĞÅÏ¢£©
+// è·å–ç³»ç»Ÿæ—¶é—´ï¼ˆèŠå¤©ä¿¡æ¯éœ€è¦æ·»åŠ æ—¶é—´ä¿¡æ¯ï¼‰
 string getCurrentTime();
-// Ö÷ÁÄÌìÒ³Ãæ³ÌĞò
+// ä¸»èŠå¤©é¡µé¢ç¨‹åº
 void mainMenu(int);
-// ÏÔÊ¾µ±Ç°µÇÂ¼³É¹¦ÓÃ»§µÄ»ù±¾ĞÅÏ¢
+// æ˜¾ç¤ºå½“å‰ç™»å½•æˆåŠŸç”¨æˆ·çš„åŸºæœ¬ä¿¡æ¯
 void showCurrentUserData();
 
-// ÁÄÌì¿Í»§¶Ë³ÌĞòÊµÏÖ£¬main Ïß³ÌÓÃ×÷·¢ËÍÏß³Ì£¬×ÓÏß³ÌÓÃ×÷½ÓÊÕÏß³Ì
-int main(int argc, char** argv) {
-    if (argc < 3) {
-        cerr << "command invalid! example: ./ChatClient 127.0.0.1 6000" << endl;
-        exit(-1);
+// èŠå¤©å®¢æˆ·ç«¯ç¨‹åºå®ç°ï¼Œmain çº¿ç¨‹ç”¨ä½œå‘é€çº¿ç¨‹ï¼Œå­çº¿ç¨‹ç”¨ä½œæ¥æ”¶çº¿ç¨‹
+int main(int argc, char **argv) {
+  if (argc < 3) {
+    cerr << "command invalid! example: ./ChatClient 127.0.0.1 6000" << endl;
+    exit(-1);
+  }
+
+  // è§£æé€šè¿‡å‘½ä»¤è¡Œå‚æ•°ä¼ é€’çš„ ip å’Œ port
+  char *ip = argv[1];
+  uint16_t port = atoi(argv[2]);
+
+  // åˆ›å»º client ç«¯çš„ socket
+  int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (-1 == clientfd) {
+    cerr << "socket create error" << endl;
+    exit(-1);
+  }
+
+  // å¡«å†™ client éœ€è¦è¿æ¥çš„ server ä¿¡æ¯ ip + port
+  sockaddr_in server;
+  memset(&server, 0, sizeof(sockaddr_in));
+
+  server.sin_family = AF_INET;
+  server.sin_port = htons(port);
+  server.sin_addr.s_addr = inet_addr(ip);
+
+  // client å’Œ server è¿›è¡Œè¿æ¥
+  if (-1 == connect(clientfd, (sockaddr *)&server, sizeof(sockaddr_in))) {
+    cerr << "connect server error" << endl;
+    close(clientfd);
+    exit(-1);
+  }
+
+  // åˆå§‹åŒ–è¯»å†™çº¿ç¨‹é€šä¿¡ç”¨çš„ä¿¡å·é‡
+  sem_init(&rwsem, 0, 0);
+
+  // è¿æ¥æœåŠ¡å™¨æˆåŠŸï¼Œå¯åŠ¨æ¥æ”¶å­çº¿ç¨‹
+  std::thread readTask(readTaskHandler, clientfd); // pthread_create
+  readTask.detach();                               // pthread_detach
+
+  // main çº¿ç¨‹ç”¨äºæ¥æ”¶ç”¨æˆ·è¾“å…¥ï¼Œè´Ÿè´£å‘é€æ•°æ®
+  for (;;) {
+    // æ˜¾ç¤ºé¦–é¡µé¢èœå• ç™»å½•ã€æ³¨å†Œã€é€€å‡º
+    cout << "========================" << endl;
+    cout << "1. login" << endl;
+    cout << "2. register" << endl;
+    cout << "3. quit" << endl;
+    cout << "========================" << endl;
+    cout << "choice:";
+    int choice = 0;
+    cin >> choice;
+    cin.get(); // è¯»æ‰ç¼“å†²åŒºæ®‹ç•™çš„å›è½¦
+
+    switch (choice) {
+    case 1: // login ä¸šåŠ¡
+    {
+      int id = 0;
+      char pwd[50] = {0};
+      cout << "userid:";
+      cin >> id;
+      cin.get(); // è¯»æ‰ç¼“å†²åŒºæ®‹ç•™çš„å›è½¦
+      cout << "userpassword:";
+      cin.getline(pwd, 50);
+
+      json js;
+      js["msgid"] = LOGIN_MSG;
+      js["id"] = id;
+      js["password"] = pwd;
+      string request = js.dump();
+
+      g_isLoginSuccess = false;
+
+      int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
+      if (len == -1)
+        cerr << "send login msg error:" << request << endl;
+
+      sem_wait(&rwsem); // ç­‰å¾…ä¿¡å·é‡ï¼Œç”±å­çº¿ç¨‹å¤„ç†å®Œç™»å½•çš„å“åº”æ¶ˆæ¯åï¼Œé€šçŸ¥è¿™é‡Œ
+
+      if (g_isLoginSuccess) {
+        // è¿›å…¥èŠå¤©ä¸»èœå•é¡µé¢
+        isMainMenuRunning = true;
+        mainMenu(clientfd);
+      }
+    } break;
+    case 2: { // register ä¸šåŠ¡
+      char name[50] = {0};
+      char pwd[50] = {0};
+      cout << "username:";
+      cin.getline(name, 50);
+      cout << "userpassword:";
+      cin.getline(pwd, 50);
+
+      json js;
+      js["msgid"] = REG_MSG;
+      js["name"] = name;
+      js["password"] = pwd;
+      string request = js.dump();
+
+      int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
+      if (len == -1)
+        cerr << "send reg msg error:" << request << endl;
+
+      sem_wait(&rwsem); // ç­‰å¾…ä¿¡å·é‡ï¼Œå­çº¿ç¨‹å¤„ç†å®Œæ³¨å†Œæ¶ˆæ¯ä¼šé€šçŸ¥
+    } break;
+    case 3: // quit ä¸šåŠ¡
+      close(clientfd);
+      sem_destroy(&rwsem);
+      exit(0);
+    default:
+      cerr << "invalid input!" << endl;
+      break;
     }
+  }
 
-    // ½âÎöÍ¨¹ıÃüÁîĞĞ²ÎÊı´«µİµÄ ip ºÍ port
-    char* ip = argv[1];
-    uint16_t port = atoi(argv[2]);
-
-    // ´´½¨ client ¶ËµÄ socket
-    int clientfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (-1 == clientfd) {
-        cerr << "socket create error" << endl;
-        exit(-1);
-    }
-
-    // ÌîĞ´ client ĞèÒªÁ¬½ÓµÄ server ĞÅÏ¢ ip + port
-    sockaddr_in server;
-    memset(&server, 0, sizeof(sockaddr_in));
-
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    server.sin_addr.s_addr = inet_addr(ip);
-
-    // client ºÍ server ½øĞĞÁ¬½Ó
-    if (-1 == connect(clientfd, (sockaddr*)&server, sizeof(sockaddr_in))) {
-        cerr << "connect server error" << endl;
-        close(clientfd);
-        exit(-1);
-    }
-
-    // ³õÊ¼»¯¶ÁĞ´Ïß³ÌÍ¨ĞÅÓÃµÄĞÅºÅÁ¿
-    sem_init(&rwsem, 0, 0);
-
-    // Á¬½Ó·şÎñÆ÷³É¹¦£¬Æô¶¯½ÓÊÕ×ÓÏß³Ì
-    std::thread readTask(readTaskHandler, clientfd); // pthread_create
-    readTask.detach();                               // pthread_detach
-
-    // main Ïß³ÌÓÃÓÚ½ÓÊÕÓÃ»§ÊäÈë£¬¸ºÔğ·¢ËÍÊı¾İ
-    for (;;) {
-        // ÏÔÊ¾Ê×Ò³Ãæ²Ëµ¥ µÇÂ¼¡¢×¢²á¡¢ÍË³ö
-        cout << "========================" << endl;
-        cout << "1. login" << endl;
-        cout << "2. register" << endl;
-        cout << "3. quit" << endl;
-        cout << "========================" << endl;
-        cout << "choice:";
-        int choice = 0;
-        cin >> choice;
-        cin.get(); // ¶Áµô»º³åÇø²ĞÁôµÄ»Ø³µ
-
-        switch (choice) {
-        case 1: // login ÒµÎñ
-        {
-            int id = 0;
-            char pwd[50] = { 0 };
-            cout << "userid:";
-            cin >> id;
-            cin.get(); // ¶Áµô»º³åÇø²ĞÁôµÄ»Ø³µ
-            cout << "userpassword:";
-            cin.getline(pwd, 50);
-
-            json js;
-            js["msgid"] = LOGIN_MSG;
-            js["id"] = id;
-            js["password"] = pwd;
-            string request = js.dump();
-
-            g_isLoginSuccess = false;
-
-            int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
-            if (len == -1)
-                cerr << "send login msg error:" << request << endl;
-
-            sem_wait(&rwsem); // µÈ´ıĞÅºÅÁ¿£¬ÓÉ×ÓÏß³Ì´¦ÀíÍêµÇÂ¼µÄÏìÓ¦ÏûÏ¢ºó£¬Í¨ÖªÕâÀï
-
-            if (g_isLoginSuccess) {
-                // ½øÈëÁÄÌìÖ÷²Ëµ¥Ò³Ãæ
-                isMainMenuRunning = true;
-                mainMenu(clientfd);
-            }
-        } break;
-        case 2: { // register ÒµÎñ
-            char name[50] = { 0 };
-            char pwd[50] = { 0 };
-            cout << "username:";
-            cin.getline(name, 50);
-            cout << "userpassword:";
-            cin.getline(pwd, 50);
-
-            json js;
-            js["msgid"] = REG_MSG;
-            js["name"] = name;
-            js["password"] = pwd;
-            string request = js.dump();
-
-            int len = send(clientfd, request.c_str(), strlen(request.c_str()) + 1, 0);
-            if (len == -1)
-                cerr << "send reg msg error:" << request << endl;
-
-            sem_wait(&rwsem); // µÈ´ıĞÅºÅÁ¿£¬×ÓÏß³Ì´¦ÀíÍê×¢²áÏûÏ¢»áÍ¨Öª
-        } break;
-        case 3: // quit ÒµÎñ
-            close(clientfd);
-            sem_destroy(&rwsem);
-            exit(0);
-        default:
-            cerr << "invalid input!" << endl;
-            break;
-        }
-    }
-
-    return 0;
+  return 0;
 }
 
-// ´¦Àí×¢²áµÄÏìÓ¦Âß¼­
-void doRegResponse(json& responsejs) {
-    if (0 != responsejs["errno"].get<int>()) // ×¢²áÊ§°Ü
-        cerr << "name is already exist, register error!" << endl;
-    else // ×¢²á³É¹¦
-        cout << "name register success, userid is " << responsejs["id"]
-        << ", do not forget it!" << endl;
+// å¤„ç†æ³¨å†Œçš„å“åº”é€»è¾‘
+void doRegResponse(json &responsejs) {
+  if (0 != responsejs["errno"].get<int>()) // æ³¨å†Œå¤±è´¥
+    cerr << "name is already exist, register error!" << endl;
+  else // æ³¨å†ŒæˆåŠŸ
+    cout << "name register success, userid is " << responsejs["id"]
+         << ", do not forget it!" << endl;
 }
 
-// ´¦ÀíµÇÂ¼µÄÏìÓ¦Âß¼­
-void doLoginResponse(json& responsejs) {
-    if (0 != responsejs["errno"].get<int>()) { // µÇÂ¼Ê§°Ü
-        cerr << responsejs["errmsg"] << endl;
-        g_isLoginSuccess = false;
+// å¤„ç†ç™»å½•çš„å“åº”é€»è¾‘
+void doLoginResponse(json &responsejs) {
+  if (0 != responsejs["errno"].get<int>()) { // ç™»å½•å¤±è´¥
+    cerr << responsejs["errmsg"] << endl;
+    g_isLoginSuccess = false;
+  } else { // ç™»å½•æˆåŠŸ
+    // è®°å½•å½“å‰ç”¨æˆ·çš„ id å’Œ name
+    g_currentUser.setId(responsejs["id"].get<int>());
+    g_currentUser.setName(responsejs["name"]);
+
+    // è®°å½•å½“å‰ç”¨æˆ·çš„å¥½å‹åˆ—è¡¨ä¿¡æ¯
+    if (responsejs.contains("friends")) { // åˆ¤æ–­æ˜¯å¦åŒ…å« friends å­—æ®µ
+      g_currentUserFriendList.clear();    // æ¸…ç©ºä¸Šæ¬¡ç™»å½•çš„å¥½å‹åˆ—è¡¨
+
+      vector<string> vec = responsejs["friends"];
+      for (string &str : vec) {
+        json js = json::parse(str);
+        User user;
+        user.setId(js["id"].get<int>());
+        user.setName(js["name"]);
+        user.setState(js["state"]);
+        g_currentUserFriendList.push_back(user);
+      }
     }
-    else { // µÇÂ¼³É¹¦
-        // ¼ÇÂ¼µ±Ç°ÓÃ»§µÄ id ºÍ name
-        g_currentUser.setId(responsejs["id"].get<int>());
-        g_currentUser.setName(responsejs["name"]);
 
-        // ¼ÇÂ¼µ±Ç°ÓÃ»§µÄºÃÓÑÁĞ±íĞÅÏ¢
-        if (responsejs.contains("friends")) { // ÅĞ¶ÏÊÇ·ñ°üº¬ friends ×Ö¶Î
-            g_currentUserFriendList.clear();    // Çå¿ÕÉÏ´ÎµÇÂ¼µÄºÃÓÑÁĞ±í
+    // è®°å½•å½“å‰ç”¨æˆ·çš„ç¾¤ç»„åˆ—è¡¨ä¿¡æ¯
+    if (responsejs.contains("groups")) { // åˆ¤æ–­æ˜¯å¦åŒ…å« groups å­—æ®µ
+      g_currentUserGroupList.clear();    // æ¸…ç©ºä¸Šæ¬¡ç™»å½•çš„ç¾¤ç»„åˆ—è¡¨
 
-            vector<string> vec = responsejs["friends"];
-            for (string& str : vec) {
-                json js = json::parse(str);
-                User user;
-                user.setId(js["id"].get<int>());
-                user.setName(js["name"]);
-                user.setState(js["state"]);
-                g_currentUserFriendList.push_back(user);
-            }
+      vector<string> vec1 = responsejs["groups"];
+      for (string &groupstr : vec1) {
+        json grpjs = json::parse(groupstr);
+        Group group;
+        group.setId(grpjs["id"].get<int>());
+        group.setName(grpjs["groupname"]);
+        group.setDesc(grpjs["groupdesc"]);
+
+        vector<string> vec2 = grpjs["users"];
+        for (string &userstr : vec2) {
+          GroupUser user;
+          json js = json::parse(userstr);
+          user.setId(js["id"].get<int>());
+          user.setName(js["name"]);
+          user.setState(js["state"]);
+          user.setRole(js["role"]);
+          group.getUsers().push_back(user);
         }
 
-        // ¼ÇÂ¼µ±Ç°ÓÃ»§µÄÈº×éÁĞ±íĞÅÏ¢
-        if (responsejs.contains("groups")) { // ÅĞ¶ÏÊÇ·ñ°üº¬ groups ×Ö¶Î
-            g_currentUserGroupList.clear();    // Çå¿ÕÉÏ´ÎµÇÂ¼µÄÈº×éÁĞ±í
-
-            vector<string> vec1 = responsejs["groups"];
-            for (string& groupstr : vec1) {
-                json grpjs = json::parse(groupstr);
-                Group group;
-                group.setId(grpjs["id"].get<int>());
-                group.setName(grpjs["groupname"]);
-                group.setDesc(grpjs["groupdesc"]);
-
-                vector<string> vec2 = grpjs["users"];
-                for (string& userstr : vec2) {
-                    GroupUser user;
-                    json js = json::parse(userstr);
-                    user.setId(js["id"].get<int>());
-                    user.setName(js["name"]);
-                    user.setState(js["state"]);
-                    user.setRole(js["role"]);
-                    group.getUsers().push_back(user);
-                }
-
-                g_currentUserGroupList.push_back(group);
-            }
-        }
-
-        // ÏÔÊ¾µÇÂ¼ÓÃ»§µÄ»ù±¾ĞÅÏ¢
-        showCurrentUserData();
-
-        // ÏÔÊ¾µ±Ç°ÓÃ»§µÄÀëÏßÏûÏ¢  ¸öÈËÁÄÌìĞÅÏ¢»òÕßÈº×éÏûÏ¢
-        if (responsejs.contains("offlinemsg")) {
-            vector<string> vec = responsejs["offlinemsg"];
-            for (string& str : vec) {
-                json js = json::parse(str);
-                // time + [id] + name + " said: " + xxx
-                if (ONE_CHAT_MSG == js["msgid"].get<int>()) {
-                    cout << js["time"].get<string>() << " [" << js["id"] << "]"
-                        << js["name"].get<string>()
-                        << " said: " << js["msg"].get<string>() << endl;
-                }
-                else {
-                    cout << "ÈºÏûÏ¢[" << js["groupid"] << "]:" << js["time"].get<string>()
-                        << " [" << js["id"] << "]" << js["name"].get<string>()
-                        << " said: " << js["msg"].get<string>() << endl;
-                }
-            }
-        }
-
-        g_isLoginSuccess = true;
+        g_currentUserGroupList.push_back(group);
+      }
     }
+
+    // æ˜¾ç¤ºç™»å½•ç”¨æˆ·çš„åŸºæœ¬ä¿¡æ¯
+    showCurrentUserData();
+
+    // æ˜¾ç¤ºå½“å‰ç”¨æˆ·çš„ç¦»çº¿æ¶ˆæ¯  ä¸ªäººèŠå¤©ä¿¡æ¯æˆ–è€…ç¾¤ç»„æ¶ˆæ¯
+    if (responsejs.contains("offlinemsg")) {
+      vector<string> vec = responsejs["offlinemsg"];
+      for (string &str : vec) {
+        json js = json::parse(str);
+        // time + [id] + name + " said: " + xxx
+        if (ONE_CHAT_MSG == js["msgid"].get<int>()) {
+          cout << js["time"].get<string>() << " [" << js["id"] << "]"
+               << js["name"].get<string>()
+               << " said: " << js["msg"].get<string>() << endl;
+        } else {
+          cout << "ç¾¤æ¶ˆæ¯[" << js["groupid"] << "]:" << js["time"].get<string>()
+               << " [" << js["id"] << "]" << js["name"].get<string>()
+               << " said: " << js["msg"].get<string>() << endl;
+        }
+      }
+    }
+
+    g_isLoginSuccess = true;
+  }
 }
 
-// ×ÓÏß³Ì - ½ÓÊÕÏß³Ì
+// å­çº¿ç¨‹ - æ¥æ”¶çº¿ç¨‹
 void readTaskHandler(int clientfd) {
-    for (;;) {
-        char buffer[1024] = { 0 };
-        int len = recv(clientfd, buffer, 1024, 0); // ×èÈû
-        if (-1 == len || 0 == len) {
-            close(clientfd);
-            exit(-1);
-        }
-
-        // ½ÓÊÕ ChatServer ×ª·¢µÄÊı¾İ£¬·´ĞòÁĞ»¯Éú³É json Êı¾İ¶ÔÏó
-        json js = json::parse(buffer);
-        int msgtype = js["msgid"].get<int>();
-        if (ONE_CHAT_MSG == msgtype) {
-            cout << js["time"].get<string>() << " [" << js["id"] << "]"
-                << js["name"].get<string>() << " said: " << js["msg"].get<string>()
-                << endl;
-            continue;
-        }
-
-        if (GROUP_CHAT_MSG == msgtype) {
-            cout << "ÈºÏûÏ¢[" << js["groupid"] << "]:" << js["time"].get<string>()
-                << " [" << js["id"] << "]" << js["name"].get<string>()
-                << " said: " << js["msg"].get<string>() << endl;
-            continue;
-        }
-
-        if (LOGIN_MSG_ACK == msgtype) {
-            doLoginResponse(js); // ´¦ÀíµÇÂ¼ÏìÓ¦µÄÒµÎñÂß¼­
-            sem_post(&rwsem);    // Í¨ÖªÖ÷Ïß³Ì£¬µÇÂ¼½á¹û´¦ÀíÍê³É
-            continue;
-        }
-
-        if (REG_MSG_ACK == msgtype) {
-            doRegResponse(js);
-            sem_post(&rwsem); // Í¨ÖªÖ÷Ïß³Ì£¬×¢²á½á¹û´¦ÀíÍê³É
-            continue;
-        }
+  for (;;) {
+    char buffer[1024] = {0};
+    int len = recv(clientfd, buffer, 1024, 0); // é˜»å¡
+    if (-1 == len || 0 == len) {
+      close(clientfd);
+      exit(-1);
     }
+
+    // æ¥æ”¶ ChatServer è½¬å‘çš„æ•°æ®ï¼Œååºåˆ—åŒ–ç”Ÿæˆ json æ•°æ®å¯¹è±¡
+    json js = json::parse(buffer);
+    int msgtype = js["msgid"].get<int>();
+    if (ONE_CHAT_MSG == msgtype) {
+      cout << js["time"].get<string>() << " [" << js["id"] << "]"
+           << js["name"].get<string>() << " said: " << js["msg"].get<string>()
+           << endl;
+      continue;
+    }
+
+    if (GROUP_CHAT_MSG == msgtype) {
+      cout << "ç¾¤æ¶ˆæ¯[" << js["groupid"] << "]:" << js["time"].get<string>()
+           << " [" << js["id"] << "]" << js["name"].get<string>()
+           << " said: " << js["msg"].get<string>() << endl;
+      continue;
+    }
+
+    if (LOGIN_MSG_ACK == msgtype) {
+      doLoginResponse(js); // å¤„ç†ç™»å½•å“åº”çš„ä¸šåŠ¡é€»è¾‘
+      sem_post(&rwsem);    // é€šçŸ¥ä¸»çº¿ç¨‹ï¼Œç™»å½•ç»“æœå¤„ç†å®Œæˆ
+      continue;
+    }
+
+    if (REG_MSG_ACK == msgtype) {
+      doRegResponse(js);
+      sem_post(&rwsem); // é€šçŸ¥ä¸»çº¿ç¨‹ï¼Œæ³¨å†Œç»“æœå¤„ç†å®Œæˆ
+      continue;
+    }
+  }
 }
 
-// ÏÔÊ¾µ±Ç°µÇÂ¼³É¹¦ÓÃ»§µÄ»ù±¾ĞÅÏ¢
+// æ˜¾ç¤ºå½“å‰ç™»å½•æˆåŠŸç”¨æˆ·çš„åŸºæœ¬ä¿¡æ¯
 void showCurrentUserData() {
-    cout << "======================login user======================" << endl;
-    cout << "current login user => id:" << g_currentUser.getId()
-        << " name:" << g_currentUser.getName() << endl;
-    cout << "----------------------friend list---------------------" << endl;
-    if (!g_currentUserFriendList.empty()) {
-        for (User& user : g_currentUserFriendList) {
-            cout << user.getId() << " " << user.getName() << " " << user.getState()
-                << endl;
-        }
+  cout << "======================login user======================" << endl;
+  cout << "current login user => id:" << g_currentUser.getId()
+       << " name:" << g_currentUser.getName() << endl;
+  cout << "----------------------friend list---------------------" << endl;
+  if (!g_currentUserFriendList.empty()) {
+    for (User &user : g_currentUserFriendList) {
+      cout << user.getId() << " " << user.getName() << " " << user.getState()
+           << endl;
     }
-    cout << "----------------------group list----------------------" << endl;
-    if (!g_currentUserGroupList.empty()) {
-        for (Group& group : g_currentUserGroupList) {
-            cout << group.getId() << " " << group.getName() << " " << group.getDesc()
-                << endl;
-            for (GroupUser& user : group.getUsers()) {
-                cout << user.getId() << " " << user.getName() << " " << user.getState()
-                    << " " << user.getRole() << endl;
-            }
-        }
+  }
+  cout << "----------------------group list----------------------" << endl;
+  if (!g_currentUserGroupList.empty()) {
+    for (Group &group : g_currentUserGroupList) {
+      cout << group.getId() << " " << group.getName() << " " << group.getDesc()
+           << endl;
+      for (GroupUser &user : group.getUsers()) {
+        cout << user.getId() << " " << user.getName() << " " << user.getState()
+             << " " << user.getRole() << endl;
+      }
     }
-    cout << "======================================================" << endl;
+  }
+  cout << "======================================================" << endl;
 }
 
 // "help" command handler
@@ -334,186 +331,185 @@ void groupchat(int, string);
 // "loginout" command handler
 void loginout(int, string);
 
-// ÏµÍ³Ö§³ÖµÄ¿Í»§¶ËÃüÁîÁĞ±í
+// ç³»ç»Ÿæ”¯æŒçš„å®¢æˆ·ç«¯å‘½ä»¤åˆ—è¡¨
 unordered_map<string, string> commandMap = {
-    {"help", "ÏÔÊ¾ËùÓĞÖ§³ÖµÄÃüÁî£¬¸ñÊ½help"},
-    {"chat", "Ò»¶ÔÒ»ÁÄÌì£¬¸ñÊ½chat:friendid:message"},
-    {"addfriend", "Ìí¼ÓºÃÓÑ£¬¸ñÊ½addfriend:friendid"},
-    {"creategroup", "´´½¨Èº×é£¬¸ñÊ½creategroup:groupname:groupdesc"},
-    {"addgroup", "¼ÓÈëÈº×é£¬¸ñÊ½addgroup:groupid"},
-    {"groupchat", "ÈºÁÄ£¬¸ñÊ½groupchat:groupid:message"},
-    {"loginout", "×¢Ïú£¬¸ñÊ½loginout"} };
+    {"help", "æ˜¾ç¤ºæ‰€æœ‰æ”¯æŒçš„å‘½ä»¤ï¼Œæ ¼å¼help"},
+    {"chat", "ä¸€å¯¹ä¸€èŠå¤©ï¼Œæ ¼å¼chat:friendid:message"},
+    {"addfriend", "æ·»åŠ å¥½å‹ï¼Œæ ¼å¼addfriend:friendid"},
+    {"creategroup", "åˆ›å»ºç¾¤ç»„ï¼Œæ ¼å¼creategroup:groupname:groupdesc"},
+    {"addgroup", "åŠ å…¥ç¾¤ç»„ï¼Œæ ¼å¼addgroup:groupid"},
+    {"groupchat", "ç¾¤èŠï¼Œæ ¼å¼groupchat:groupid:message"},
+    {"loginout", "æ³¨é”€ï¼Œæ ¼å¼loginout"}};
 
-// ×¢²áÏµÍ³Ö§³ÖµÄ¿Í»§¶ËÃüÁî´¦Àí
+// æ³¨å†Œç³»ç»Ÿæ”¯æŒçš„å®¢æˆ·ç«¯å‘½ä»¤å¤„ç†
 unordered_map<string, function<void(int, string)>> commandHandlerMap = {
     {"help", help},           {"chat", chat},
     {"addfriend", addfriend}, {"creategroup", creategroup},
     {"addgroup", addgroup},   {"groupchat", groupchat},
-    {"loginout", loginout} };
+    {"loginout", loginout}};
 
-// Ö÷ÁÄÌìÒ³Ãæ³ÌĞò
+// ä¸»èŠå¤©é¡µé¢ç¨‹åº
 void mainMenu(int clientfd) {
-    help();
+  help();
 
-    char buffer[1024] = { 0 };
-    while (isMainMenuRunning) {
-        cin.getline(buffer, 1024);
-        string commandbuf(buffer);
-        string command; // ´æ´¢ÃüÁî
-        int idx = commandbuf.find(":");
-        command = -1 == idx ? commandbuf : commandbuf.substr(0, idx);
+  char buffer[1024] = {0};
+  while (isMainMenuRunning) {
+    cin.getline(buffer, 1024);
+    string commandbuf(buffer);
+    string command; // å­˜å‚¨å‘½ä»¤
+    int idx = commandbuf.find(":");
+    command = -1 == idx ? commandbuf : commandbuf.substr(0, idx);
 
-        auto it = commandHandlerMap.find(command);
-        if (it == commandHandlerMap.end()) {
-            cerr << "invalid input command!" << endl;
-            continue;
-        }
-
-        // µ÷ÓÃÏàÓ¦ÃüÁîµÄÊÂ¼ş´¦Àí»Øµ÷£¬mainMenu
-        // ¶ÔĞŞ¸Ä·â±Õ£¬Ìí¼ÓĞÂ¹¦ÄÜ²»ĞèÒªĞŞ¸Ä¸Ãº¯Êı
-        it->second(clientfd,
-            commandbuf.substr(idx + 1,
-                commandbuf.size() - idx)); // µ÷ÓÃÃüÁî´¦Àí·½·¨
+    auto it = commandHandlerMap.find(command);
+    if (it == commandHandlerMap.end()) {
+      cerr << "invalid input command!" << endl;
+      continue;
     }
+
+    // è°ƒç”¨ç›¸åº”å‘½ä»¤çš„äº‹ä»¶å¤„ç†å›è°ƒï¼ŒmainMenu
+    // å¯¹ä¿®æ”¹å°é—­ï¼Œæ·»åŠ æ–°åŠŸèƒ½ä¸éœ€è¦ä¿®æ”¹è¯¥å‡½æ•°
+    it->second(clientfd,
+               commandbuf.substr(idx + 1,
+                                 commandbuf.size() - idx)); // è°ƒç”¨å‘½ä»¤å¤„ç†æ–¹æ³•
+  }
 }
 
 // "help" command handler
 void help(int, string) {
-    cout << "show command list >>> " << endl;
-    for (auto& p : commandMap) {
-        cout << p.first << " : " << p.second << endl;
-    }
-    cout << endl;
+  cout << "show command list >>> " << endl;
+  for (auto &p : commandMap) {
+    cout << p.first << " : " << p.second << endl;
+  }
+  cout << endl;
 }
 
 // "addfriend" command handler
 void addfriend(int clientfd, string str) {
-    int friendid = atoi(str.c_str());
-    json js;
-    js["msgid"] = ADD_FRIEND_MSG;
-    js["id"] = g_currentUser.getId();
-    js["friendid"] = friendid;
-    string buffer = js.dump();
+  int friendid = atoi(str.c_str());
+  json js;
+  js["msgid"] = ADD_FRIEND_MSG;
+  js["id"] = g_currentUser.getId();
+  js["friendid"] = friendid;
+  string buffer = js.dump();
 
-    int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
-    if (-1 == len) {
-        cerr << "send addfriend msg error -> " << buffer << endl;
-    }
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
+  if (-1 == len) {
+    cerr << "send addfriend msg error -> " << buffer << endl;
+  }
 }
 // "chat" command handler
 void chat(int clientfd, string str) {
-    int idx = str.find(":"); // friendid:message
-    if (-1 == idx) {
-        cerr << "chat command invalid!" << endl;
-        return;
-    }
+  int idx = str.find(":"); // friendid:message
+  if (-1 == idx) {
+    cerr << "chat command invalid!" << endl;
+    return;
+  }
 
-    int friendid = atoi(str.substr(0, idx).c_str());
-    string message = str.substr(idx + 1, str.size() - idx);
+  int friendid = atoi(str.substr(0, idx).c_str());
+  string message = str.substr(idx + 1, str.size() - idx);
 
-    json js;
-    js["msgid"] = ONE_CHAT_MSG;
-    js["id"] = g_currentUser.getId();
-    js["name"] = g_currentUser.getName();
-    js["toid"] = friendid;
-    js["msg"] = message;
-    js["time"] = getCurrentTime();
-    string buffer = js.dump();
+  json js;
+  js["msgid"] = ONE_CHAT_MSG;
+  js["id"] = g_currentUser.getId();
+  js["name"] = g_currentUser.getName();
+  js["toid"] = friendid;
+  js["msg"] = message;
+  js["time"] = getCurrentTime();
+  string buffer = js.dump();
 
-    int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
-    if (-1 == len) {
-        cerr << "send chat msg error -> " << buffer << endl;
-    }
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
+  if (-1 == len) {
+    cerr << "send chat msg error -> " << buffer << endl;
+  }
 }
 // "creategroup" command handler  groupname:groupdesc
 void creategroup(int clientfd, string str) {
-    int idx = str.find(":");
-    if (-1 == idx) {
-        cerr << "creategroup command invalid!" << endl;
-        return;
-    }
+  int idx = str.find(":");
+  if (-1 == idx) {
+    cerr << "creategroup command invalid!" << endl;
+    return;
+  }
 
-    string groupname = str.substr(0, idx);
-    string groupdesc = str.substr(idx + 1, str.size() - idx);
+  string groupname = str.substr(0, idx);
+  string groupdesc = str.substr(idx + 1, str.size() - idx);
 
-    json js;
-    js["msgid"] = CREATE_GROUP_MSG;
-    js["id"] = g_currentUser.getId();
-    js["groupname"] = groupname;
-    js["groupdesc"] = groupdesc;
-    string buffer = js.dump();
+  json js;
+  js["msgid"] = CREATE_GROUP_MSG;
+  js["id"] = g_currentUser.getId();
+  js["groupname"] = groupname;
+  js["groupdesc"] = groupdesc;
+  string buffer = js.dump();
 
-    int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
-    if (-1 == len) {
-        cerr << "send creategroup msg error -> " << buffer << endl;
-    }
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
+  if (-1 == len) {
+    cerr << "send creategroup msg error -> " << buffer << endl;
+  }
 }
 
 // "addgroup" command handler
 void addgroup(int clientfd, string str) {
-    int groupid = atoi(str.c_str());
-    json js;
-    js["msgid"] = ADD_GROUP_MSG;
-    js["id"] = g_currentUser.getId();
-    js["groupid"] = groupid;
-    string buffer = js.dump();
+  int groupid = atoi(str.c_str());
+  json js;
+  js["msgid"] = ADD_GROUP_MSG;
+  js["id"] = g_currentUser.getId();
+  js["groupid"] = groupid;
+  string buffer = js.dump();
 
-    int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
-    if (-1 == len) {
-        cerr << "send addgroup msg error -> " << buffer << endl;
-    }
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
+  if (-1 == len) {
+    cerr << "send addgroup msg error -> " << buffer << endl;
+  }
 }
 
 // "groupchat" command handler   groupid:message
 void groupchat(int clientfd, string str) {
-    int idx = str.find(":");
-    if (-1 == idx) {
-        cerr << "groupchat command invalid!" << endl;
-        return;
-    }
+  int idx = str.find(":");
+  if (-1 == idx) {
+    cerr << "groupchat command invalid!" << endl;
+    return;
+  }
 
-    int groupid = atoi(str.substr(0, idx).c_str());
-    string message = str.substr(idx + 1, str.size() - idx);
+  int groupid = atoi(str.substr(0, idx).c_str());
+  string message = str.substr(idx + 1, str.size() - idx);
 
-    json js;
-    js["msgid"] = GROUP_CHAT_MSG;
-    js["id"] = g_currentUser.getId();
-    js["name"] = g_currentUser.getName();
-    js["groupid"] = groupid;
-    js["msg"] = message;
-    js["time"] = getCurrentTime();
-    string buffer = js.dump();
+  json js;
+  js["msgid"] = GROUP_CHAT_MSG;
+  js["id"] = g_currentUser.getId();
+  js["name"] = g_currentUser.getName();
+  js["groupid"] = groupid;
+  js["msg"] = message;
+  js["time"] = getCurrentTime();
+  string buffer = js.dump();
 
-    int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
-    if (-1 == len) {
-        cerr << "send groupchat msg error -> " << buffer << endl;
-    }
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
+  if (-1 == len) {
+    cerr << "send groupchat msg error -> " << buffer << endl;
+  }
 }
 
 // "loginout" command handler
 void loginout(int clientfd, string) {
-    json js;
-    js["msgid"] = LOGINOUT_MSG;
-    js["id"] = g_currentUser.getId();
-    string buffer = js.dump();
+  json js;
+  js["msgid"] = LOGINOUT_MSG;
+  js["id"] = g_currentUser.getId();
+  string buffer = js.dump();
 
-    int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
-    if (-1 == len) {
-        cerr << "send loginout msg error -> " << buffer << endl;
-    }
-    else {
-        isMainMenuRunning = false;
-    }
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
+  if (-1 == len) {
+    cerr << "send loginout msg error -> " << buffer << endl;
+  } else {
+    isMainMenuRunning = false;
+  }
 }
 
-// »ñÈ¡ÏµÍ³Ê±¼ä£¨ÁÄÌìĞÅÏ¢ĞèÒªÌí¼ÓÊ±¼äĞÅÏ¢£©
+// è·å–ç³»ç»Ÿæ—¶é—´ï¼ˆèŠå¤©ä¿¡æ¯éœ€è¦æ·»åŠ æ—¶é—´ä¿¡æ¯ï¼‰
 string getCurrentTime() {
-    auto tt =
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    struct tm* ptm = localtime(&tt);
-    char date[60] = { 0 };
-    sprintf(date, "%d-%02d-%02d %02d:%02d:%02d", (int)ptm->tm_year + 1900,
-        (int)ptm->tm_mon + 1, (int)ptm->tm_mday, (int)ptm->tm_hour,
-        (int)ptm->tm_min, (int)ptm->tm_sec);
-    return std::string(date);
+  auto tt =
+      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  struct tm *ptm = localtime(&tt);
+  char date[60] = {0};
+  sprintf(date, "%d-%02d-%02d %02d:%02d:%02d", (int)ptm->tm_year + 1900,
+          (int)ptm->tm_mon + 1, (int)ptm->tm_mday, (int)ptm->tm_hour,
+          (int)ptm->tm_min, (int)ptm->tm_sec);
+  return std::string(date);
 }

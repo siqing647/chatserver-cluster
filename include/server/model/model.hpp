@@ -4,7 +4,7 @@
 
 class model {
 public:
-	model() { _connPool = ConnectionPool::getConnectionPool(); }
-	// 单例对象的连接池
-	ConnectionPool* _connPool;
+  model() { _connPool = ConnectionPool::getConnectionPool(); }
+  // 鍗曚緥瀵硅薄鐨勮繛鎺ユ睜
+  ConnectionPool *_connPool;
 };

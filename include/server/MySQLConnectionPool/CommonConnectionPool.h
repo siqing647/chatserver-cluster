@@ -1,8 +1,7 @@
-
 #pragma once
 
 /*
- * Êı¾İ¿âÁ¬½Ó³Ø
+ * æ•°æ®åº“è¿æ¥æ± 
  */
 
 #include "Connection.h"
@@ -19,30 +18,30 @@ using namespace std;
 
 class ConnectionPool {
 public:
-	static ConnectionPool* getConnectionPool(); // »ñÈ¡Á¬½Ó³Ø¶ÔÏó
-	shared_ptr<Connection> getConnection();     // »ñÈ¡¿ÕÏĞÁ¬½Ó
+  static ConnectionPool *getConnectionPool(); // è·å–è¿æ¥æ± å¯¹è±¡
+  shared_ptr<Connection> getConnection();     // è·å–ç©ºé—²è¿æ¥
 
 private:
-	ConnectionPool(); // µ¥ÀıÄ£Ê½
+  ConnectionPool(); // å•ä¾‹æ¨¡å¼
 
-	bool loadConfigFile(); // ´ÓÅäÖÃÎÄ¼şÖĞ¼ÓÔØÅäÖÃ
+  bool loadConfigFile(); // ä»é…ç½®æ–‡ä»¶ä¸­åŠ è½½é…ç½®
 
-	void produceConnectionTask(); // Éú²úÕßÏß³Ì£¬Éú²úĞÂÁ¬½Ó
+  void produceConnectionTask(); // ç”Ÿäº§è€…çº¿ç¨‹ï¼Œç”Ÿäº§æ–°è¿æ¥
 
-	void scannerConnectionTask(); // ¶¨Ê±¼ì²â¿ÕÏĞÁ¬½Ó£¬»ØÊÕ³¬Ê±Á¬½Ó
+  void scannerConnectionTask(); // å®šæ—¶æ£€æµ‹ç©ºé—²è¿æ¥ï¼Œå›æ”¶è¶…æ—¶è¿æ¥
 
-	string _ip;             // Êı¾İ¿âip
-	unsigned short _port;   // Êı¾İ¿â¶Ë¿Ú
-	string _username;       // Êı¾İ¿âÓÃ»§Ãû
-	string _password;       // Êı¾İ¿âÃÜÂë
-	string _dbname;         // Êı¾İ¿âÃû
-	int _initSize;          // Êı¾İ¿âÁ¬½Ó³ØÁ¬½Ó³õÊ¼ÊıÁ¿
-	int _maxSize;           // Êı¾İ¿âÁ¬½Ó³Ø×î´óÊıÁ¿
-	int _maxIdleTime;       // ×î´ó¿ÕÏĞÊ±¼ä
-	int _connectionTimeout; // Êı¾İ¿âÁ¬½Ó³¬Ê±Ê±¼ä
+  string _ip;             // æ•°æ®åº“ip
+  unsigned short _port;   // æ•°æ®åº“ç«¯å£
+  string _username;       // æ•°æ®åº“ç”¨æˆ·å
+  string _password;       // æ•°æ®åº“å¯†ç 
+  string _dbname;         // æ•°æ®åº“å
+  int _initSize;          // æ•°æ®åº“è¿æ¥æ± è¿æ¥åˆå§‹æ•°é‡
+  int _maxSize;           // æ•°æ®åº“è¿æ¥æ± æœ€å¤§æ•°é‡
+  int _maxIdleTime;       // æœ€å¤§ç©ºé—²æ—¶é—´
+  int _connectionTimeout; // æ•°æ®åº“è¿æ¥è¶…æ—¶æ—¶é—´
 
-	queue<Connection*> _connectionQue; // Á¬½Ó¶ÓÁĞ
-	mutex _queueMutex;                  // Á¬½Ó¶ÓÁĞ»¥³âËø
-	condition_variable cv;     // Ìõ¼ş±äÁ¿£¬ÓÃÓÚ»½ĞÑÏû·ÑÕßÏß³Ì
-	atomic_int _connectionCnt; // µ±Ç°ÒÑ´´½¨µÄÁ¬½ÓÊı
+  queue<Connection *> _connectionQue; // è¿æ¥é˜Ÿåˆ—
+  mutex _queueMutex;                  // è¿æ¥é˜Ÿåˆ—äº’æ–¥é”
+  condition_variable cv;     // æ¡ä»¶å˜é‡ï¼Œç”¨äºå”¤é†’æ¶ˆè´¹è€…çº¿ç¨‹
+  atomic_int _connectionCnt; // å½“å‰å·²åˆ›å»ºçš„è¿æ¥æ•°
 };

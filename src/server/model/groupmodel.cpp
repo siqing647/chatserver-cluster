@@ -1,109 +1,108 @@
-
 #include "groupmodel.hpp"
 
-// ´´½¨Èº×é
-bool GroupModel::createGroup(Group& group) {
-    // 1. ×é×° sql Óï¾ä
-    char sql[1024] = { 0 };
-    sprintf(sql, "insert into allgroup(groupname, groupdesc) values('%s', '%s')",
-        group.getName().c_str(), group.getDesc().c_str());
+// åˆ›å»ºç¾¤ç»„
+bool GroupModel::createGroup(Group &group) {
+  // 1. ç»„è£… sql è¯­å¥
+  char sql[1024] = {0};
+  sprintf(sql, "insert into allgroup(groupname, groupdesc) values('%s', '%s')",
+          group.getName().c_str(), group.getDesc().c_str());
 
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp)
-        if (sp->update(sql)) {
-            // ½« group µÄ id ÉèÖÃÎªµ±Ç°²åÈëµÄÊı¾İµÄ id£¨×ÔÔöµÄÖ÷¼ü£©
-            group.setId(mysql_insert_id((*sp).getConnection()));
-            return true;
-        }
-
-    return false;
-}
-
-// ¼ÓÈëÈº×é
-void GroupModel::addGroup(int userid, int groupid, string role) {
-    // 1. ×é×° sql Óï¾ä
-    char sql[1024] = { 0 };
-    sprintf(sql, "insert into groupuser values(%d, %d, '%s')", groupid, userid,
-        role.c_str());
-
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp)
-        sp->update(sql);
-}
-
-// ²éÑ¯ÓÃ»§ËùÔÚÈº×éĞÅÏ¢
-vector<Group> GroupModel::queryGroups(int userid) {
-    /*
-     * 1. ÏÈ¸ù¾İ userid ÔÚ groupuser ±íÖĞ²éÑ¯³ö¸ÃÓÃ»§ËùÊôµÄÈº×éĞÅÏ¢
-     * 2. ÔÙ¸ù¾İÈº×éĞÅÏ¢£¬²éÑ¯ÊôÓÚ¸ÃÈº×éµÄËùÓĞÓÃ»§µÄ userid
-     *    ²¢ÇÒºÍ user ±í½øĞĞ¶à±íÁªºÏ²éÑ¯£¬²é³öÓÃ»§µÄÏêÏ¸ĞÅÏ¢
-     */
-    char sql[1024] = { 0 };
-    sprintf(sql,
-        "select a.id, a.groupname, a.groupdesc from allgroup a inner join \
-         groupuser b on a.id = b.groupid where b.userid=%d",
-        userid);
-
-    vector<Group> groupVec;
-
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp) {
-        MYSQL_RES* res = sp->query(sql);
-        if (res != nullptr) {
-            MYSQL_ROW row;
-            // ²é³ö userid ËùÓĞµÄÈº×éĞÅÏ¢
-            while ((row = mysql_fetch_row(res)) != nullptr) {
-                Group group;
-                group.setId(atoi(row[0]));
-                group.setName(row[1]);
-                group.setDesc(row[2]);
-                groupVec.push_back(group);
-            }
-            mysql_free_result(res);
-        }
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp)
+    if (sp->update(sql)) {
+      // å°† group çš„ id è®¾ç½®ä¸ºå½“å‰æ’å…¥çš„æ•°æ®çš„ idï¼ˆè‡ªå¢çš„ä¸»é”®ï¼‰
+      group.setId(mysql_insert_id((*sp).getConnection()));
+      return true;
     }
 
-    // ²éÑ¯Èº×éµÄÓÃ»§ĞÅÏ¢
-    for (Group& group : groupVec) {
-        sprintf(sql, "select a.id, a.name, a.state, b.grouprole from user a \
+  return false;
+}
+
+// åŠ å…¥ç¾¤ç»„
+void GroupModel::addGroup(int userid, int groupid, string role) {
+  // 1. ç»„è£… sql è¯­å¥
+  char sql[1024] = {0};
+  sprintf(sql, "insert into groupuser values(%d, %d, '%s')", groupid, userid,
+          role.c_str());
+
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp)
+    sp->update(sql);
+}
+
+// æŸ¥è¯¢ç”¨æˆ·æ‰€åœ¨ç¾¤ç»„ä¿¡æ¯
+vector<Group> GroupModel::queryGroups(int userid) {
+  /*
+   * 1. å…ˆæ ¹æ® userid åœ¨ groupuser è¡¨ä¸­æŸ¥è¯¢å‡ºè¯¥ç”¨æˆ·æ‰€å±çš„ç¾¤ç»„ä¿¡æ¯
+   * 2. å†æ ¹æ®ç¾¤ç»„ä¿¡æ¯ï¼ŒæŸ¥è¯¢å±äºè¯¥ç¾¤ç»„çš„æ‰€æœ‰ç”¨æˆ·çš„ userid
+   *    å¹¶ä¸”å’Œ user è¡¨è¿›è¡Œå¤šè¡¨è”åˆæŸ¥è¯¢ï¼ŒæŸ¥å‡ºç”¨æˆ·çš„è¯¦ç»†ä¿¡æ¯
+   */
+  char sql[1024] = {0};
+  sprintf(sql,
+          "select a.id, a.groupname, a.groupdesc from allgroup a inner join \
+         groupuser b on a.id = b.groupid where b.userid=%d",
+          userid);
+
+  vector<Group> groupVec;
+
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp) {
+    MYSQL_RES *res = sp->query(sql);
+    if (res != nullptr) {
+      MYSQL_ROW row;
+      // æŸ¥å‡º userid æ‰€æœ‰çš„ç¾¤ç»„ä¿¡æ¯
+      while ((row = mysql_fetch_row(res)) != nullptr) {
+        Group group;
+        group.setId(atoi(row[0]));
+        group.setName(row[1]);
+        group.setDesc(row[2]);
+        groupVec.push_back(group);
+      }
+      mysql_free_result(res);
+    }
+  }
+
+  // æŸ¥è¯¢ç¾¤ç»„çš„ç”¨æˆ·ä¿¡æ¯
+  for (Group &group : groupVec) {
+    sprintf(sql, "select a.id, a.name, a.state, b.grouprole from user a \
             inner join groupuser b on b.userid = a.id where b.groupid=%d",
             group.getId());
 
-        MYSQL_RES* res = sp->query(sql);
-        if (res != nullptr) {
-            MYSQL_ROW row;
-            while ((row = mysql_fetch_row(res)) != nullptr) {
-                GroupUser user;
-                user.setId(atoi(row[0]));
-                user.setName(row[1]);
-                user.setState(row[2]);
-                user.setRole(row[3]);
-                group.getUsers().push_back(user);
-            }
-            mysql_free_result(res);
-        }
+    MYSQL_RES *res = sp->query(sql);
+    if (res != nullptr) {
+      MYSQL_ROW row;
+      while ((row = mysql_fetch_row(res)) != nullptr) {
+        GroupUser user;
+        user.setId(atoi(row[0]));
+        user.setName(row[1]);
+        user.setState(row[2]);
+        user.setRole(row[3]);
+        group.getUsers().push_back(user);
+      }
+      mysql_free_result(res);
     }
-    return groupVec;
+  }
+  return groupVec;
 }
 
-// ¸ù¾İÖ¸¶¨µÄ groupid ²éÑ¯Èº×éÓÃ»§ id ÁĞ±í£¬³ı userid ×Ô¼º
-// Ö÷ÒªÓÃÓÚÈºÁÄÒµÎñ¸øÈº×éÆäËü³ÉÔ±Èº·¢ÏûÏ¢
+// æ ¹æ®æŒ‡å®šçš„ groupid æŸ¥è¯¢ç¾¤ç»„ç”¨æˆ· id åˆ—è¡¨ï¼Œé™¤ userid è‡ªå·±
+// ä¸»è¦ç”¨äºç¾¤èŠä¸šåŠ¡ç»™ç¾¤ç»„å…¶å®ƒæˆå‘˜ç¾¤å‘æ¶ˆæ¯
 vector<int> GroupModel::queryGroupUsers(int userid, int groupid) {
-    char sql[1024] = { 0 };
-    sprintf(sql,
-        "select userid from groupuser where groupid = %d and userid != %d",
-        groupid, userid);
+  char sql[1024] = {0};
+  sprintf(sql,
+          "select userid from groupuser where groupid = %d and userid != %d",
+          groupid, userid);
 
-    vector<int> idVec;
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp) {
-        MYSQL_RES* res = sp->query(sql);
-        if (res != nullptr) {
-            MYSQL_ROW row;
-            while ((row = mysql_fetch_row(res)) != nullptr)
-                idVec.push_back(atoi(row[0]));
-            mysql_free_result(res);
-        }
+  vector<int> idVec;
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp) {
+    MYSQL_RES *res = sp->query(sql);
+    if (res != nullptr) {
+      MYSQL_ROW row;
+      while ((row = mysql_fetch_row(res)) != nullptr)
+        idVec.push_back(atoi(row[0]));
+      mysql_free_result(res);
     }
-    return idVec;
+  }
+  return idVec;
 }

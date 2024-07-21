@@ -1,4 +1,3 @@
-
 #include "chatserver.hpp"
 #include "chatservice.hpp"
 #include "json.hpp"
@@ -10,48 +9,48 @@ using namespace std;
 using namespace placeholders;
 using json = nlohmann::json;
 
-// ³õÊ¼»¯ÁÄÌì·şÎñÆ÷¶ÔÏó
-ChatServer::ChatServer(EventLoop* loop, const InetAddress& listenAddr,
-    const string& nameArg)
+// åˆå§‹åŒ–èŠå¤©æœåŠ¡å™¨å¯¹è±¡
+ChatServer::ChatServer(EventLoop *loop, const InetAddress &listenAddr,
+                       const string &nameArg)
     : _server(loop, listenAddr, nameArg), _loop(loop) {
-    // ×¢²áÁ¬½Ó»Øµ÷
-    _server.setConnectionCallback(std::bind(&ChatServer::onConnection, this, _1));
+  // æ³¨å†Œè¿æ¥å›è°ƒ
+  _server.setConnectionCallback(std::bind(&ChatServer::onConnection, this, _1));
 
-    // ×¢²áÏûÏ¢»Øµ÷
-    _server.setMessageCallback(
-        std::bind(&ChatServer::onMessage, this, _1, _2, _3));
+  // æ³¨å†Œæ¶ˆæ¯å›è°ƒ
+  _server.setMessageCallback(
+      std::bind(&ChatServer::onMessage, this, _1, _2, _3));
 
-    // ÉèÖÃÏß³ÌÊıÁ¿
-    _server.setThreadNum(4);
+  // è®¾ç½®çº¿ç¨‹æ•°é‡
+  _server.setThreadNum(4);
 }
 
-// Æô¶¯·şÎñ
+// å¯åŠ¨æœåŠ¡
 void ChatServer::start() { _server.start(); }
 
-// ÉÏ±¨Á¬½ÓÏà¹ØĞÅÏ¢µÄ»Øµ÷º¯Êı
-void ChatServer::onConnection(const TcpConnectionPtr& conn) {
-    if (!conn->connected()) { // ¿Í»§¶Ë¶Ï¿ªÁ´½Ó
-        ChatService::instance()->clientCloseException(conn);
-        conn->shutdown();
-    }
+// ä¸ŠæŠ¥è¿æ¥ç›¸å…³ä¿¡æ¯çš„å›è°ƒå‡½æ•°
+void ChatServer::onConnection(const TcpConnectionPtr &conn) {
+  if (!conn->connected()) { // å®¢æˆ·ç«¯æ–­å¼€é“¾æ¥
+    ChatService::instance()->clientCloseException(conn);
+    conn->shutdown();
+  }
 }
 
-// ÉÏ±¨¶ÁĞ´ÊÂ¼şÏà¹ØĞÅÏ¢µÄ»Øµ÷º¯Êı
-void ChatServer::onMessage(const TcpConnectionPtr& conn, Buffer* buffer,
-    Timestamp time) {
-    string buf = buffer->retrieveAllAsString();
+// ä¸ŠæŠ¥è¯»å†™äº‹ä»¶ç›¸å…³ä¿¡æ¯çš„å›è°ƒå‡½æ•°
+void ChatServer::onMessage(const TcpConnectionPtr &conn, Buffer *buffer,
+                           Timestamp time) {
+  string buf = buffer->retrieveAllAsString();
 
-    // ²âÊÔ£¬Ìí¼Ójson´òÓ¡´úÂë
-    // cout << buf << endl;
+  // æµ‹è¯•ï¼Œæ·»åŠ jsonæ‰“å°ä»£ç 
+  // cout << buf << endl;
 
-    // Êı¾İµÄ·´ĞòÁĞ»¯
-    json js = json::parse(buf);
+  // æ•°æ®çš„ååºåˆ—åŒ–
+  json js = json::parse(buf);
 
-    // ×÷ÓÃ£ºÍêÈ«½âñîÍøÂçÄ£¿éµÄ´úÂëºÍÒµÎñÄ£¿éµÄ´úÂë
-    // Í¨¹ı js["msgid"] µÄ get<int>() ·½·¨»ñÈ¡ÏûÏ¢ÀàĞÍ
-    // ¸ù¾İÏûÏ¢ÀàĞÍ£¬·µ»Ø¶ÔÓ¦µÄÒµÎñ´¦ÀíÆ÷£¨¾ÍÊÇÒ»¸ö»Øµ÷£¨º¯Êı¶ÔÏó£©£©
-    auto msgHandler = ChatService::instance()->getHandler(js["msgid"].get<int>());
+  // ä½œç”¨ï¼šå®Œå…¨è§£è€¦ç½‘ç»œæ¨¡å—çš„ä»£ç å’Œä¸šåŠ¡æ¨¡å—çš„ä»£ç 
+  // é€šè¿‡ js["msgid"] çš„ get<int>() æ–¹æ³•è·å–æ¶ˆæ¯ç±»å‹
+  // æ ¹æ®æ¶ˆæ¯ç±»å‹ï¼Œè¿”å›å¯¹åº”çš„ä¸šåŠ¡å¤„ç†å™¨ï¼ˆå°±æ˜¯ä¸€ä¸ªå›è°ƒï¼ˆå‡½æ•°å¯¹è±¡ï¼‰ï¼‰
+  auto msgHandler = ChatService::instance()->getHandler(js["msgid"].get<int>());
 
-    // Í¨¹ıÊÂÏÈ°ó¶¨ºÃµÄ»Øµ÷º¯Êı£¬À´Ö´ĞĞÏàÓ¦µÄÒµÎñ´¦Àí
-    msgHandler(conn, js, time);
+  // é€šè¿‡äº‹å…ˆç»‘å®šå¥½çš„å›è°ƒå‡½æ•°ï¼Œæ¥æ‰§è¡Œç›¸åº”çš„ä¸šåŠ¡å¤„ç†
+  msgHandler(conn, js, time);
 }

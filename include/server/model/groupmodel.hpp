@@ -1,4 +1,3 @@
-
 #ifndef GROUPMODEL_H
 #define GROUPMODEL_H
 
@@ -8,18 +7,18 @@
 #include <vector>
 using namespace std;
 
-// Î¬»¤Èº×éĞÅÏ¢µÄ²Ù×÷½Ó¿Ú·½·¨
+// ç»´æŠ¤ç¾¤ç»„ä¿¡æ¯çš„æ“ä½œæ¥å£æ–¹æ³•
 class GroupModel : public model {
 public:
-	// ´´½¨Èº×é
-	bool createGroup(Group& group);
-	// ¼ÓÈëÈº×é
-	void addGroup(int userid, int groupid, string role);
-	// ²éÑ¯ÓÃ»§ËùÔÚÈº×éĞÅÏ¢
-	vector<Group> queryGroups(int userid);
-	// ¸ù¾İÖ¸¶¨µÄ groupid ²éÑ¯Èº×éÓÃ»§ id ÁĞ±í£¬³ı userid ×Ô¼º
-	// Ö÷ÒªÓÃÓÚÈºÁÄÒµÎñ¸øÈº×éÆäËü³ÉÔ±Èº·¢ÏûÏ¢
-	vector<int> queryGroupUsers(int userid, int groupid);
+  // åˆ›å»ºç¾¤ç»„
+  bool createGroup(Group &group);
+  // åŠ å…¥ç¾¤ç»„
+  void addGroup(int userid, int groupid, string role);
+  // æŸ¥è¯¢ç”¨æˆ·æ‰€åœ¨ç¾¤ç»„ä¿¡æ¯
+  vector<Group> queryGroups(int userid);
+  // æ ¹æ®æŒ‡å®šçš„ groupid æŸ¥è¯¢ç¾¤ç»„ç”¨æˆ· id åˆ—è¡¨ï¼Œé™¤ userid è‡ªå·±
+  // ä¸»è¦ç”¨äºç¾¤èŠä¸šåŠ¡ç»™ç¾¤ç»„å…¶å®ƒæˆå‘˜ç¾¤å‘æ¶ˆæ¯
+  vector<int> queryGroupUsers(int userid, int groupid);
 };
 
 #endif

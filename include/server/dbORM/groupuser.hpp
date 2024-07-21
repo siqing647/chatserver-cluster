@@ -1,17 +1,16 @@
-
 #ifndef GROUPUSER_H
 #define GROUPUSER_H
 
 #include "user.hpp"
 
-// Èº×éÓÃ»§£¬¶àÁËÒ»¸ö role ½ÇÉ«ÐÅÏ¢£¬´Ó User ÀàÖ±½Ó¼Ì³Ð£¬¸´ÓÃ User µÄÆäËüÐÅÏ¢
+// ç¾¤ç»„ç”¨æˆ·ï¼Œå¤šäº†ä¸€ä¸ª role è§’è‰²ä¿¡æ¯ï¼Œä»Ž User ç±»ç›´æŽ¥ç»§æ‰¿ï¼Œå¤ç”¨ User çš„å…¶å®ƒä¿¡æ¯
 class GroupUser : public User {
 public:
-	void setRole(string role) { this->role = role; }
-	string getRole() { return this->role; }
+  void setRole(string role) { this->role = role; }
+  string getRole() { return this->role; }
 
 private:
-	string role;
+  string role;
 };
 
 #endif

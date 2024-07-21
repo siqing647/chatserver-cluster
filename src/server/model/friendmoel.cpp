@@ -1,43 +1,42 @@
-
 #include "friendmodel.hpp"
 
-// Ìí¼ÓºÃÓÑ¹ØÏµ
+// æ·»åŠ å¥½å‹å…³ç³»
 void FriendModel::insert(int userid, int friendid) {
-    // 1. ×é×° sql Óï¾ä
-    char sql[1024] = { 0 };
-    sprintf(sql, "insert into friend values(%d, %d)", userid, friendid);
+  // 1. ç»„è£… sql è¯­å¥
+  char sql[1024] = {0};
+  sprintf(sql, "insert into friend values(%d, %d)", userid, friendid);
 
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp) sp->update(sql);
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if(sp) sp->update(sql);
 }
 
-// ·µ»ØÓÃ»§ºÃÓÑÁĞ±í
+// è¿”å›ç”¨æˆ·å¥½å‹åˆ—è¡¨
 vector<User> FriendModel::query(int userid) {
-    // 1. ×é×° sql Óï¾ä
-    char sql[1024] = { 0 };
+  // 1. ç»„è£… sql è¯­å¥
+  char sql[1024] = {0};
 
-    sprintf(sql,
-        "select a.id, a.name, a.state from user a inner join friend b on "
-        "b.friendid = a.id where b.userid=%d",
-        userid);
+  sprintf(sql,
+          "select a.id, a.name, a.state from user a inner join friend b on "
+          "b.friendid = a.id where b.userid=%d",
+          userid);
 
-    vector<User> vec;
-    shared_ptr<Connection> sp = _connPool->getConnection();
-    if (sp) {
-        MYSQL_RES* res = sp->query(sql);
-        if (res != nullptr) {
-            // °Ñ userid ÓÃ»§µÄËùÓĞºÃÓÑĞÅÏ¢·ÅÈë vec ÖĞ·µ»Ø
-            MYSQL_ROW row;
-            while ((row = mysql_fetch_row(res)) != nullptr) {
-                User user;
-                user.setId(atoi(row[0]));
-                user.setName(row[1]);
-                user.setState(row[2]);
-                vec.push_back(user);
-            }
-            mysql_free_result(res);
-            return vec;
-        }
+  vector<User> vec;
+  shared_ptr<Connection> sp = _connPool->getConnection();
+  if (sp) {
+    MYSQL_RES *res = sp->query(sql);
+    if (res != nullptr) {
+      // æŠŠ userid ç”¨æˆ·çš„æ‰€æœ‰å¥½å‹ä¿¡æ¯æ”¾å…¥ vec ä¸­è¿”å›
+      MYSQL_ROW row;
+      while ((row = mysql_fetch_row(res)) != nullptr) {
+        User user;
+        user.setId(atoi(row[0]));
+        user.setName(row[1]);
+        user.setState(row[2]);
+        vec.push_back(user);
+      }
+      mysql_free_result(res);
+      return vec;
     }
-    return vec;
+  }
+  return vec;
 }

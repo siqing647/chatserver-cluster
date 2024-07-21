@@ -1,4 +1,3 @@
-
 #ifndef OFFLINEMESSAGEMODEL_H
 #define OFFLINEMESSAGEMODEL_H
 
@@ -7,17 +6,17 @@
 #include <vector>
 using namespace std;
 
-// Ìá¹©ÀëÏßÏûÏ¢±íµÄ²Ù×÷½Ó¿Ú·½·¨
+// æä¾›ç¦»çº¿æ¶ˆæ¯è¡¨çš„æ“ä½œæ¥å£æ–¹æ³•
 class OfflineMsgModel : public model {
 public:
-	// ´æ´¢ÓÃ»§µÄÀëÏßÏûÏ¢
-	void insert(int userid, string msg);
+  // å­˜å‚¨ç”¨æˆ·çš„ç¦»çº¿æ¶ˆæ¯
+  void insert(int userid, string msg);
 
-	// É¾³ıÓÃ»§µÄÀëÏßÏûÏ¢
-	void remove(int userid);
+  // åˆ é™¤ç”¨æˆ·çš„ç¦»çº¿æ¶ˆæ¯
+  void remove(int userid);
 
-	// ²éÑ¯ÓÃ»§µÄÀëÏßÏûÏ¢
-	vector<string> query(int userid);
+  // æŸ¥è¯¢ç”¨æˆ·çš„ç¦»çº¿æ¶ˆæ¯
+  vector<string> query(int userid);
 };
 
 #endif

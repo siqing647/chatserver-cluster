@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <mysql/mysql.h>
@@ -8,23 +7,23 @@ using namespace std;
 
 class Connection {
 public:
-    Connection();  // ³õÊ¼»¯Êı¾İ¿âÁ¬½Ó
-    ~Connection(); // ÊÍ·ÅÊı¾İ¿âÁ¬½Ó×ÊÔ´
-    bool connect(string ip, unsigned int port, string username, string password,
-        string dbname);  // Á¬½ÓÊı¾İ¿â
-    bool update(string sql);      // ¸üĞÂ²Ù×÷, insert, update, delete
-    MYSQL_RES* query(string sql); // ²éÑ¯²Ù×÷, select
+  Connection();  // åˆå§‹åŒ–æ•°æ®åº“è¿æ¥
+  ~Connection(); // é‡Šæ”¾æ•°æ®åº“è¿æ¥èµ„æº
+  bool connect(string ip, unsigned int port, string username, string password,
+               string dbname);  // è¿æ¥æ•°æ®åº“
+  bool update(string sql);      // æ›´æ–°æ“ä½œ, insert, update, delete
+  MYSQL_RES *query(string sql); // æŸ¥è¯¢æ“ä½œ, select
 
-    // »ñÈ¡µ±Ç° MySQL Á¬½Ó
-    MYSQL* getConnection() const { return _conn; }
+  // è·å–å½“å‰ MySQL è¿æ¥
+  MYSQL *getConnection() const { return _conn; }
 
-    // Ë¢ĞÂÁ¬½ÓµÄÆğÊ¼µÄ¿ÕÏĞÊ±¼äµã£¬clock() ·µ»ØµÄÊÇ CPU Ê±¼ä
-    void refreshAliveTime() { _alivetime = clock(); }
+  // åˆ·æ–°è¿æ¥çš„èµ·å§‹çš„ç©ºé—²æ—¶é—´ç‚¹ï¼Œclock() è¿”å›çš„æ˜¯ CPU æ—¶é—´
+  void refreshAliveTime() { _alivetime = clock(); }
 
-    // ·µ»Ø´æ»îµÄÊ±¼ä
-    clock_t getAliveTime() const { return clock() - _alivetime; }
+  // è¿”å›å­˜æ´»çš„æ—¶é—´
+  clock_t getAliveTime() const { return clock() - _alivetime; }
 
 private:
-    MYSQL* _conn;       // Êı¾İ¿âÁ¬½Ó
-    clock_t _alivetime; // ¼ÇÂ¼Á¬½ÓµÄ¿ÕÏĞÊ±¼äÆğÊ¼µã
+  MYSQL *_conn;       // æ•°æ®åº“è¿æ¥
+  clock_t _alivetime; // è®°å½•è¿æ¥çš„ç©ºé—²æ—¶é—´èµ·å§‹ç‚¹
 };

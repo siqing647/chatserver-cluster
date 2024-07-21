@@ -1,4 +1,3 @@
-
 #ifndef FRIENDMODEL_H
 #define FRIENDMODEL_H
 
@@ -7,14 +6,14 @@
 #include <vector>
 using namespace std;
 
-// Î¬»¤ºÃÓÑĞÅÏ¢µÄ²Ù×÷½Ó¿Ú·½·¨
+// ç»´æŠ¤å¥½å‹ä¿¡æ¯çš„æ“ä½œæ¥å£æ–¹æ³•
 class FriendModel : public model {
 public:
-	// Ìí¼ÓºÃÓÑ¹ØÏµ
-	void insert(int userid, int friendid);
+  // æ·»åŠ å¥½å‹å…³ç³»
+  void insert(int userid, int friendid);
 
-	// ·µ»ØÓÃ»§ºÃÓÑÁĞ±í
-	vector<User> query(int userid);
+  // è¿”å›ç”¨æˆ·å¥½å‹åˆ—è¡¨
+  vector<User> query(int userid);
 };
 
 #endif

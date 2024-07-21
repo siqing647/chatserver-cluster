@@ -1,78 +1,77 @@
+# èŠå¤©æœåŠ¡å™¨å•æœºç‰ˆ
 
-# ÁÄÌì·şÎñÆ÷µ¥»ú°æ
-
-Ê¹ÓÃ·½Ê½
+ä½¿ç”¨æ–¹å¼
 
 ```shell
-mkdir build && cmake .. && make  # Ö®ºóÔËĞĞ¿ÉÖ´ĞĞÎÄ¼ş¼´¿É
+mkdir build && cmake .. && make  # ä¹‹åè¿è¡Œå¯æ‰§è¡Œæ–‡ä»¶å³å¯
 ```
 
-## 1 ¿ª·¢»·¾³
+## 1 å¼€å‘ç¯å¢ƒ
 
-[µ¥»ú°æ Docker ¿ª·¢»·¾³£ºUbuntu 22.04](https://github.com/Corner430/Docker/tree/main/chatserver)
+[å•æœºç‰ˆ Docker å¼€å‘ç¯å¢ƒï¼šUbuntu 22.04](https://github.com/Corner430/Docker/tree/main/chatserver)
 
-ÓÃµ½µÄ¼¼ÊõÕ»£º
+ç”¨åˆ°çš„æŠ€æœ¯æ ˆï¼š
 
-- Json ĞòÁĞ»¯ºÍ·´ĞòÁĞ»¯£¬½èÖúÓÚ [json for Modern C++](https://github.com/nlohmann/json)
-- muduo ÍøÂç¿â¿ª·¢£¬½èÖúÓÚ [muduo](https://github.com/chenshuo/muduo)
-- MySQL Á¬½Ó³ØµÄÊ¹ÓÃ£¬½èÖúÓÚ [MySQL-Connection-Pool](https://github.com/Corner430/MySQL-Connection-Pool)
+- Json åºåˆ—åŒ–å’Œååºåˆ—åŒ–ï¼Œå€ŸåŠ©äº [json for Modern C++](https://github.com/nlohmann/json)
+- muduo ç½‘ç»œåº“å¼€å‘ï¼Œå€ŸåŠ©äº [muduo](https://github.com/chenshuo/muduo)
+- MySQL è¿æ¥æ± çš„ä½¿ç”¨ï¼Œå€ŸåŠ©äº [MySQL-Connection-Pool](https://github.com/Corner430/MySQL-Connection-Pool)
 
-## 2 ÏîÄ¿ĞèÇó
+## 2 é¡¹ç›®éœ€æ±‚
 
-1. ¿Í»§¶ËĞÂÓÃ»§×¢²á
-2. ¿Í»§¶ËÓÃ»§µÇÂ¼
-3. ¿Í»§¶ËÓÃ»§ÍË³ö
-4. Ìí¼ÓºÃÓÑºÍÈº×é
-5. ºÃÓÑÁÄÌì
-6. Èº×éÁÄÌì
-7. ÀëÏßÏûÏ¢
+1. å®¢æˆ·ç«¯æ–°ç”¨æˆ·æ³¨å†Œ
+2. å®¢æˆ·ç«¯ç”¨æˆ·ç™»å½•
+3. å®¢æˆ·ç«¯ç”¨æˆ·é€€å‡º
+4. æ·»åŠ å¥½å‹å’Œç¾¤ç»„
+5. å¥½å‹èŠå¤©
+6. ç¾¤ç»„èŠå¤©
+7. ç¦»çº¿æ¶ˆæ¯
 
-## 3 ÏîÄ¿Ä¿±ê
+## 3 é¡¹ç›®ç›®æ ‡
 
-1. ÕÆÎÕ·şÎñÆ÷µÄÍøÂç I/O Ä£¿é£¬ÒµÎñÄ£¿é£¬Êı¾İÄ£¿é·Ö²ãµÄÉè¼ÆË¼Ïë
-2. ÕÆÎÕ C++ muduo ÍøÂç¿âµÄ±à³ÌÒÔ¼°ÊµÏÖÔ­Àí
-3. ÕÆÎÕ Json µÄ±à³ÌÓ¦ÓÃ
-4. ÕÆÎÕ MySQL Á¬½Ó³ØµÄÊ¹ÓÃ
-5. ÕÆÎÕ Docker Ò»¼ü²¿Êğ
-6. ÕÆÎÕ CMake
+1. æŒæ¡æœåŠ¡å™¨çš„ç½‘ç»œ I/O æ¨¡å—ï¼Œä¸šåŠ¡æ¨¡å—ï¼Œæ•°æ®æ¨¡å—åˆ†å±‚çš„è®¾è®¡æ€æƒ³
+2. æŒæ¡ C++ muduo ç½‘ç»œåº“çš„ç¼–ç¨‹ä»¥åŠå®ç°åŸç†
+3. æŒæ¡ Json çš„ç¼–ç¨‹åº”ç”¨
+4. æŒæ¡ MySQL è¿æ¥æ± çš„ä½¿ç”¨
+5. æŒæ¡ Docker ä¸€é”®éƒ¨ç½²
+6. æŒæ¡ CMake
 
-## 4 Êı¾İ¿âÉè¼Æ
+## 4 æ•°æ®åº“è®¾è®¡
 
-**User ±í**
+**User è¡¨**
 
-| ×Ö¶ÎÃû | ÀàĞÍ | ËµÃ÷ | Ô¼Êø |
+| å­—æ®µå | ç±»å‹ | è¯´æ˜ | çº¦æŸ |
 | --- | --- | --- | --- |
-| id | INT | ÓÃ»§ id | PRIMARY KEY , AUTO_INCREMENT |
-| name | VARCHAR(50) | ÓÃ»§Ãû | NOT NULL , UNIQUE |
-| password | VARCHAR(50) | ÃÜÂë | NOT NULL |
-| state | ENUM('online', 'offline') | ÓÃ»§µÇÂ¼×´Ì¬ | DEFAULT 'offline' |
+| id | INT | ç”¨æˆ· id | PRIMARY KEY , AUTO_INCREMENT |
+| name | VARCHAR(50) | ç”¨æˆ·å | NOT NULL , UNIQUE |
+| password | VARCHAR(50) | å¯†ç  | NOT NULL |
+| state | ENUM('online', 'offline') | ç”¨æˆ·ç™»å½•çŠ¶æ€ | DEFAULT 'offline' |
 
-**Friend ±í**
+**Friend è¡¨**
 
-| ×Ö¶ÎÃû | ÀàĞÍ | ËµÃ÷ | Ô¼Êø |
+| å­—æ®µå | ç±»å‹ | è¯´æ˜ | çº¦æŸ |
 | --- | --- | --- | --- |
-| userid | INT | ÓÃ»§ id | NOT NULL , ÁªºÏÖ÷¼ü |
-| friendid | INT | ºÃÓÑ id | NOT NULL , ÁªºÏÖ÷¼ü |
+| userid | INT | ç”¨æˆ· id | NOT NULL , è”åˆä¸»é”® |
+| friendid | INT | å¥½å‹ id | NOT NULL , è”åˆä¸»é”® |
 
-**AllGroup ±í**
+**AllGroup è¡¨**
 
-| ×Ö¶ÎÃû | ÀàĞÍ | ËµÃ÷ | Ô¼Êø |
+| å­—æ®µå | ç±»å‹ | è¯´æ˜ | çº¦æŸ |
 | --- | --- | --- | --- |
-| id | INT | Èº×é id | PRIMARY KEY , AUTO_INCREMENT |
-| groupname | VARCHAR(50) | Èº×éÃû | NOT NULL , UNIQUE |
-| groupdesc | VARCHAR(200) | Èº×éÃèÊö | DEFAULT '' |
+| id | INT | ç¾¤ç»„ id | PRIMARY KEY , AUTO_INCREMENT |
+| groupname | VARCHAR(50) | ç¾¤ç»„å | NOT NULL , UNIQUE |
+| groupdesc | VARCHAR(200) | ç¾¤ç»„æè¿° | DEFAULT '' |
 
-**GroupUser ±í**
+**GroupUser è¡¨**
 
-| ×Ö¶ÎÃû | ÀàĞÍ | ËµÃ÷ | Ô¼Êø |
+| å­—æ®µå | ç±»å‹ | è¯´æ˜ | çº¦æŸ |
 | --- | --- | --- | --- |
-| groupid | INT | Èº×é id | NOT NULL , ÁªºÏÖ÷¼ü |
-| userid | INT | ×éÔ± id | NOT NULL, ÁªºÏÖ÷¼ü |
-| grouprole | ENUM('creator', 'normal') | ×éÔ±½ÇÉ« | DEFAULT 'normal' |
+| groupid | INT | ç¾¤ç»„ id | NOT NULL , è”åˆä¸»é”® |
+| userid | INT | ç»„å‘˜ id | NOT NULL, è”åˆä¸»é”® |
+| grouprole | ENUM('creator', 'normal') | ç»„å‘˜è§’è‰² | DEFAULT 'normal' |
 
-**OfflineMessage ±í**
+**OfflineMessage è¡¨**
 
-| ×Ö¶ÎÃû | ÀàĞÍ | ËµÃ÷ | Ô¼Êø |
+| å­—æ®µå | ç±»å‹ | è¯´æ˜ | çº¦æŸ |
 | --- | --- | --- | --- |
-| userid | INT | ÓÃ»§ id | NOT NULL |
-| message | VARCHAR(500) | ÀëÏßÏûÏ¢£¨´æ´¢ Json ×Ö·û´®£© | NOT NULL |
+| userid | INT | ç”¨æˆ· id | NOT NULL |
+| message | VARCHAR(500) | ç¦»çº¿æ¶ˆæ¯ï¼ˆå­˜å‚¨ Json å­—ç¬¦ä¸²ï¼‰ | NOT NULL |

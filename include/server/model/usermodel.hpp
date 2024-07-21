@@ -1,24 +1,23 @@
-
 #ifndef USERMODEL_H
 #define USERMODEL_H
 
 #include "model.hpp"
 #include "user.hpp"
 
-// User ±íµÄÊı¾İ²Ù×÷Àà
+// User è¡¨çš„æ•°æ®æ“ä½œç±»
 class UserModel : public model {
 public:
-	// User ±íµÄÔö¼Ó·½·¨
-	bool insert(User& user);
+  // User è¡¨çš„å¢åŠ æ–¹æ³•
+  bool insert(User &user);
 
-	// ¸ù¾İÓÃ»§ºÅÂë²éÑ¯ÓÃ»§ĞÅÏ¢
-	User query(int id);
+  // æ ¹æ®ç”¨æˆ·å·ç æŸ¥è¯¢ç”¨æˆ·ä¿¡æ¯
+  User query(int id);
 
-	// ¸üĞÂÓÃ»§µÄ×´Ì¬ĞÅÏ¢
-	bool updateState(User user);
+  // æ›´æ–°ç”¨æˆ·çš„çŠ¶æ€ä¿¡æ¯
+  bool updateState(User user);
 
-	// ÖØÖÃÓÃ»§µÄ×´Ì¬ĞÅÏ¢
-	void resetState();
+  // é‡ç½®ç”¨æˆ·çš„çŠ¶æ€ä¿¡æ¯
+  void resetState();
 };
 
 #endif
