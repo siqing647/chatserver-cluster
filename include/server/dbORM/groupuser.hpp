@@ -1,16 +1,35 @@
-#ifndef GROUPUSER_H
-#define GROUPUSER_H
 
-#include "user.hpp"
+#ifndef GROUP_H
+#define GROUP_H
 
-// 群组用户，多了一个 role 角色信息，从 User 类直接继承，复用 User 的其它信息
-class GroupUser : public User {
+#include "groupuser.hpp"
+#include <string>
+#include <vector>
+using namespace std;
+
+// Group 表的 ORM 类
+class Group {
 public:
-  void setRole(string role) { this->role = role; }
-  string getRole() { return this->role; }
+    Group(int id = -1, string name = "", string desc = "") {
+        this->id = id;
+        this->name = name;
+        this->desc = desc;
+    }
+
+    void setId(int id) { this->id = id; }
+    void setName(string name) { this->name = name; }
+    void setDesc(string desc) { this->desc = desc; }
+
+    int getId() { return this->id; }
+    string getName() { return this->name; }
+    string getDesc() { return this->desc; }
+    vector<GroupUser>& getUsers() { return this->users; }
 
 private:
-  string role;
+    int id;
+    string name;
+    string desc;
+    vector<GroupUser> users;
 };
 
 #endif
