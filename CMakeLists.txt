@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.10) # 指定cmake的最低版本
 project(chat)   # 指定项目名称
 
@@ -17,6 +18,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/server)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/MySQLConnectionPool)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/dbORM)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/model)
+include_directories(${PROJECT_SOURCE_DIR}/include/server/redis)
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty)
 # link_directories(/usr/lib64/mysql)
 
