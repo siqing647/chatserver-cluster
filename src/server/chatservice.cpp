@@ -1,3 +1,4 @@
+
 #include "chatservice.hpp"
 #include "public.hpp"
 #include <muduo/base/Logging.h>
@@ -34,7 +35,7 @@ ChatService::ChatService() {
         { GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, _1, _2, _3) });
 
     // 获取数据库连接池
-    _connPool = ConnectionPool::getConnectionPool();
+    _connPool = ConnectionPool::getConnectionPool(); // TODO delete
 
     // 连接 redis 服务器
     if (_redis.connect()) {
